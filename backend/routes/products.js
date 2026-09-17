@@ -61,6 +61,24 @@ router.delete('/:uid/products/:pid',async (req, res) => {
 
 })
 
+router.patch('/:uid/products/:pid',async (req, res) => {
+
+    const pid = req.params.pid;
+    const uid = req.params.uid;
+    const name = req.body.name;
+    const inventory = req.body.inventory;
+    const cost = req.body.cost;
+    const price = req.body.price;
+
+    const queryResponse = await db.query(`UPDATE produtos SET nome = $1, custo = $2, preco = $3, estoque = $4 WHERE uid = $5 AND id = $6 RETURNING *`,[name,cost,price,inventory,uid,pid]);
+    const queryProduct = queryResponse.rows[0];
+    console.log("Produto Atualizado: " + queryProduct);
+    res.status(204).send();
+
+
+
+})
+
 
 
 module.exports = router;
