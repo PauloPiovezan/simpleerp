@@ -33,7 +33,7 @@ else{
     }, process.env.JWT_SECRET, {expiresIn: '5m'})
 
     res.cookie('token',token,{httpOnly:true});
-//Upon succesful login, updates the matching user's refresh token and stores it in another cookie, also sent to the frontend, and sends a successful login response
+//Upon succesful login, updates the matching user's refresh token and stores it in another cookie, also sent to the frontend, and redirects the user to the mock frontend dashboard, for now
     const reftokenResponse = await db.query(`UPDATE usuarios SET reftoken = gen_random_uuid() WHERE uid = $1 RETURNING reftoken`,[queryData[0].uid]);
     res.cookie('reftoken',reftokenResponse.rows[0].reftoken,{httpOnly:true});
     res.status(200).send("Login Efeituado com sucesso!");

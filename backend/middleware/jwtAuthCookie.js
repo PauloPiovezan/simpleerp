@@ -17,36 +17,42 @@ async function jwtAuthCookie(req, res, next){
         next();
 //if it is not, an error is thrown
     } catch(err){
+        console.log(err.name)
 //if this error is an expired token error we request a new token using the reftoken,
 //also stored as a cookie passed down from the login request
         if (err.name == "TokenExpiredError" ){
         const reftoken = req.cookies.reftoken;
-  
+            
         const queryResponse = await db.query(`SELECT * FROM usuarios WHERE uid = $1`,[jwt.decode(token).sub]);
         const queryData = queryResponse.rows;
+        console.log(queryData[0].reftoken)
 //If the reftoken matches the one in the DB, a new JWT is issued and the Request follows it's intended path
         if (reftoken == queryData[0].reftoken){
+            
             const newToken = jwt.sign({
                     sub : queryData[0].uid,
                     iss : 'SimpleERP',
                     role: queryData[0].permissao
                 }, process.env.JWT_SECRET, {expiresIn: '5m'})
-            
+                console.log("NEW TOKEN ISSUED: " + newToken)
                 res.cookie('token',newToken,{httpOnly:true});
                 next();
 
 //If it does not match, however, the error is an expired reftoken,
 //in which case the user must log in again
         } else {
-            res.status(401).send(err.name);
+            
             res.clearCookie('token');
             res.clearCookie('reftoken');
+            res.status(401).send();
+            return;
         }
     }
-//If the Error was not related to an expired JWT, send the error as a response to be handled by the backend
+//If the Error was not related to an expired JWT, send the error as a response to be handled by the frontend
     else{
-        res.status(401).send(err.name);
+        
         res.clearCookie('token');
+        res.status(401).send(err.name);
     }
 
         
@@ -56,4 +62,4 @@ async function jwtAuthCookie(req, res, next){
 
 }
 
-exports = jwtAuthCookie;
+module.exports = jwtAuthCookie;
