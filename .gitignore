@@ -1,0 +1,6 @@
+/backend/mockfrontend
+/backend/routes/mockfrontendroutes.js
+/backend/routes/testapiroutes.js
+/backend/node_modules
+*.env
+TODO.txt
