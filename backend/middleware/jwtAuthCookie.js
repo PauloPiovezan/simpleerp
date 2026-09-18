@@ -25,7 +25,6 @@ async function jwtAuthCookie(req, res, next){
             
         const queryResponse = await db.query(`SELECT * FROM usuarios WHERE uid = $1`,[jwt.decode(token).sub]);
         const queryData = queryResponse.rows;
-        console.log(queryData[0].reftoken)
 //If the reftoken matches the one in the DB, a new JWT is issued and the Request follows it's intended path
         if (reftoken == queryData[0].reftoken){
             
@@ -34,7 +33,6 @@ async function jwtAuthCookie(req, res, next){
                     iss : 'SimpleERP',
                     role: queryData[0].permissao
                 }, process.env.JWT_SECRET, {expiresIn: '5m'})
-                console.log("NEW TOKEN ISSUED: " + newToken)
                 res.cookie('token',newToken,{httpOnly:true});
                 next();
 

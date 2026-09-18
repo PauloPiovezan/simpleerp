@@ -6,7 +6,7 @@ const db = require('../db');
 
 //GET the user's products from the DB, or a single one filtered by id;
 //All
-router.get('/:uid/products/', async (req,res) => {
+router.get('/:uid/products', async (req,res) => {
     const uid = req.params.uid;
     const queryResponse = await db.query(`SELECT * FROM produtos WHERE uid = $1`,[uid]);
 
@@ -54,7 +54,6 @@ router.delete('/:uid/products/:pid',async (req, res) => {
 
     const queryResponse = await db.query(`DELETE FROM produtos WHERE uid = $1 AND id = $2 RETURNING *`,[uid,pid]);
     const queryProduct = queryResponse.rows[0].nome;
-    console.log("Produto Excluido:" + queryProduct);
     res.status(204).send();
 
 
