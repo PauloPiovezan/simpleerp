@@ -4,6 +4,7 @@ const devFrontendRouter = require('./routes/mockfrontendroutes');
 const testApiRouter = require('./routes/testapiroutes');
 const productRouter = require('./routes/products');
 const clientRouter = require('./routes/clients');
+const userRouter = require('./routes/users')
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
@@ -24,6 +25,7 @@ app.use('/api',jwtAuthCookie);
 app.use('/api/:uid',sameUserAuth);
 app.use('/api',productRouter);
 app.use('/api',clientRouter);
+app.use('/api',userRouter);
 app.use('/api',testApiRouter);
 
 
