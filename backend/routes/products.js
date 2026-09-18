@@ -8,41 +8,77 @@ const db = require('../db');
 //All
 router.get('/:uid/products', async (req,res) => {
     const uid = req.params.uid;
+
+    if (!uid) {
+
+        res.status(400).send();
+
+    }
+
+
+    try{
+
     const queryResponse = await db.query(`SELECT * FROM produtos WHERE uid = $1`,[uid]);
 
     const queryData = queryResponse.rows;
 
     res.status(200).json(queryData);
+    }
+    catch(error){
 
+        res.status(500).send(error.name);
+
+    }
 })
 //Single
 router.get('/:uid/products/:product',async (req,res) => {
     const uid = req.params.uid;
     const pid = req.params.product;
 
+    if (!uid || !pid) {
 
+        res.status(400).send();
+
+    }
+
+    try {
     const queryResponse = await db.query(`SELECT * FROM produtos WHERE uid = $1 AND id = $2`,[uid,pid]);
 
     const queryData = queryResponse.rows[0];
 
     res.status(200).json(queryData);
+    }
+    catch(error){
 
+        res.status(500).send(error.name);
+
+    }
 
 })
 
 //CREATE NEW PRODUCT
 router.put('/:uid/products',async (req, res) => {
 
-    const name = req.body.name;
-    const cost = req.body.cost;
-    const price = req.body.price;
-    const unitId = req.body.unitId;
-    const inventory = req.body.inventory;
+    
     const uid = req.params.uid;
 
+    if (!uid) {
+
+        res.status(400).send();
+
+    }
+
+    const {name, inventory, cost, price,unitId} = req.body;
+
+    try {
     const queryResponse = await db.query(`INSERT INTO produtos (nome, id_unidade, custo, preco,estoque, uid) VALUES($1, $2, $3, $4, $5, $6)`,[name, unitId, cost, price, inventory, uid ])
     res.status(201).send();
+    }
+    catch(error){
 
+        res.status(500).send(error.name);
+
+    }
 
 
 })
@@ -52,10 +88,21 @@ router.delete('/:uid/products/:pid',async (req, res) => {
     const pid = req.params.pid;
     const uid = req.params.uid;
 
+    if (!uid || !pid) {
+
+        res.status(400).send();
+
+    }
+    try {
     const queryResponse = await db.query(`DELETE FROM produtos WHERE uid = $1 AND id = $2 RETURNING *`,[uid,pid]);
     const queryProduct = queryResponse.rows[0].nome;
     res.status(204).send();
+    }
+    catch(error){
 
+        res.status(500).send(error.name);
+
+    }
 
 
 })
@@ -64,16 +111,26 @@ router.patch('/:uid/products/:pid',async (req, res) => {
 
     const pid = req.params.pid;
     const uid = req.params.uid;
-    const name = req.body.name;
-    const inventory = req.body.inventory;
-    const cost = req.body.cost;
-    const price = req.body.price;
 
+    if (!uid || !pid) {
+
+        res.status(400).send();
+
+    }
+
+    const {name, inventory, cost, price} = req.body;
+    try {
     const queryResponse = await db.query(`UPDATE produtos SET nome = $1, custo = $2, preco = $3, estoque = $4 WHERE uid = $5 AND id = $6 RETURNING *`,[name,cost,price,inventory,uid,pid]);
     const queryProduct = queryResponse.rows[0];
     console.log("Produto Atualizado: " + queryProduct);
     res.status(204).send();
+    }
 
+    catch(error){
+
+        res.status(500).send(error.name);
+
+    }
 
 
 })

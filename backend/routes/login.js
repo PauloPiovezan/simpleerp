@@ -11,8 +11,14 @@ loginRouter.post('/login', async (req,res) => {
 const username = req.body.username;
 const password = req.body.password;
 
-//Queries the DB to match the hashes
+if (!username || !password){
 
+    res.status(400).send("Bad Request!");
+
+}
+
+//Queries the DB to match the hashes
+try{
 const queryResponse = await db.query(`SELECT * FROM usuarios WHERE nomeusuario = $1`,[username]);
 queryData = queryResponse.rows;
 //If the length of the array returned from the query is 0, meaning there were no matching users found, the request fails
@@ -30,8 +36,6 @@ if (hashMatch){
     res.cookie('token',token,{httpOnly:true});
 //Upon succesful login, updates the matching user's refresh token and stores it in another cookie, also sent to the frontend, and redirects the user to the mock frontend dashboard, for now
     const reftokenResponse = await db.query(`UPDATE usuarios SET reftoken = gen_random_uuid() WHERE uid = $1 RETURNING reftoken`,[queryData[0].uid]);
-    console.log("Linhas retornadas:", reftokenResponse.rows);
-    console.log("Usuário Buscado:" + queryData[0].uid)
     res.cookie('reftoken',reftokenResponse.rows[0].reftoken,{httpOnly:true});
     res.status(200).send("Login Efeituado com sucesso!");
 
@@ -45,8 +49,13 @@ else{
     res.status(401).send("Credenciais Incorretas!");
     
 }
+} catch(error){
 
 
+    res.status(500).send(error.name);
+
+
+}
 });
 
 
