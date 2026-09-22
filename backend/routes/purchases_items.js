@@ -6,7 +6,7 @@ const router = express.Router();
 //Get all or Single
 //All
 
-router.get('/:uid/purchases', async (req,res) =>{
+router.get('/:uid/purchasesitems', async (req,res) =>{
 
     const uid = req.params.uid;
 
@@ -16,7 +16,7 @@ router.get('/:uid/purchases', async (req,res) =>{
 
     }
     try {
-    const queryResponse = await db.query(`SELECT * FROM cabecalho_compras WHERE uid = $1`,[uid]);
+    const queryResponse = await db.query(`SELECT * FROM produtos_compras WHERE uid = $1`,[uid]);
 
     const queryData = queryResponse.rows;
 
@@ -29,7 +29,7 @@ router.get('/:uid/purchases', async (req,res) =>{
 
 });
 
-router.get('/:uid/purchases/:pid', async (req,res) =>{
+router.get('/:uid/purchasesitems/:pid', async (req,res) =>{
 
     const {uid,pid} = req.params;
 
@@ -39,7 +39,7 @@ router.get('/:uid/purchases/:pid', async (req,res) =>{
 
     }
     try {
-    const queryResponse = await db.query(`SELECT * FROM cabecalho_compras WHERE uid = $1 AND pid = $2`,[uid,pid]);
+    const queryResponse = await db.query(`SELECT * FROM produtos_compras WHERE uid = $1 AND pid = $2`,[uid,pid]);
 
     const queryData = queryResponse.rows[0];
 
@@ -53,7 +53,7 @@ router.get('/:uid/purchases/:pid', async (req,res) =>{
 });
 
 //Create new
-router.put('/:uid/purchases', async (req, res) => {
+router.put('/:uid/purchasesitems', async (req, res) => {
 
     const uid = req.params.uid;
 
@@ -63,11 +63,11 @@ router.put('/:uid/purchases', async (req, res) => {
 
     }
 
-    const {cfop,supplier,payID,status} = req.body;
+    const {product,head} = req.body;
 
     try {
 
-    const queryResponse = await db.query(`INSERT INTO cabecalho_compras (id_cfop,id_fornecedor,id_pagamento,status,uid) VALUES ($1, $2, $3, $4, $5)`,[cfop,supplier,payID,status,uid]);
+    const queryResponse = await db.query(`INSERT INTO cabecalho_compras (id_produto, id_cabecalho, uid) SELECT * FROM UNNEST($1::INTEGER[], $2::INTEGER[], $3::UUID[])`,[product,head,uid]);
 
 
     res.status(204).send();
@@ -80,7 +80,7 @@ router.put('/:uid/purchases', async (req, res) => {
     }
 });
 //Update
-router.patch('/:uid/purchases/:pid', async (req, res) => {
+router.patch('/:uid/purchasesitems/:pid', async (req, res) => {
 
     const {uid,pid} = req.params;
 
@@ -90,9 +90,9 @@ router.patch('/:uid/purchases/:pid', async (req, res) => {
 
     }
 
-    const {cfop,supplier,payID,status} = req.body;
+    const {products} = req.body;
     try {
-    const queryResponse = await db.query(`UPDATE cabecalho_compras SET id_cfop = $1, id_fornecedor = $2, id_pagamento = $3, status = $4 WHERE uid = $5 AND id = $6`,[cfop,supplier,payID,status,uid,pid]);
+    const queryResponse = await db.query(`UPDATE produtos_compras SET id_produto = u.products, id_cabecalho = u.head FROM UNNEST($1::INTEGER[], $2::INTEGER[], $3::UUID[], $4::INTEGER[]) AS u (products, head, uid, pid) WHERE produtos_compras.uid = u.uid AND produtos_compras.id = u.pid`,[products,head,uid,pid]);
 
     res.status(204).send();
     }
@@ -103,17 +103,20 @@ router.patch('/:uid/purchases/:pid', async (req, res) => {
     }
 });
 //Delete
-router.delete('/:uid/purchases/:pid', async (req,res) =>{
+router.delete('/:uid/purchasesitems/:pid', async (req,res) =>{
 
-    const {uid,pid} = req.params;
+    const uid = req.params.uid;
 
-    if (!uid || !pid){
+    if (!uid){
 
         return res.status(400).send();
 
     }
+
+    const {products} = req.body
+
     try {
-    const queryResponse = await db.query(`DELETE FROM cabecalho_compras WHERE uid = $1 AND id = $2`,[uid,pid]);
+    const queryResponse = await db.query(`DELETE FROM produtos_compras WHERE uid = $1 AND id = ANY($2::INTEGER)`,[uid,products]);
 
     res.status(204).send();
     }
