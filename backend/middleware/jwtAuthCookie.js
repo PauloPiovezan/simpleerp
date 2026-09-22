@@ -11,8 +11,8 @@ async function jwtAuthCookie(req, res, next){
 
     if (!token){
 
-        res.redirect('http://127.0.0.1:5555/dev/login');
-
+        return res.redirect('http://127.0.0.1:5555/dev/login');
+        
     }
 
 

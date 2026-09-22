@@ -9,7 +9,14 @@ async function sameUserAuth(req, res, next) {
     const token = jwt.decode(req.cookies.token);
 
     if (uid){
-    uid == token.sub ? next() : res.status(401).send("ACCESS DENIED");
+        if(uid == token.sub){
+            next()
+        }
+        else{
+
+            return res.status(401).send("ACCESS DENIED");
+
+        }
     }else{
     next();
     }
