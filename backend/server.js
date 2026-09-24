@@ -4,7 +4,10 @@ const devFrontendRouter = require('./routes/mockfrontendroutes');
 const testApiRouter = require('./routes/testapiroutes');
 const productRouter = require('./routes/products');
 const clientRouter = require('./routes/clients');
-const userRouter = require('./routes/users')
+const userRouter = require('./routes/users');
+const payRouter = require('./routes/pay');
+const purchaseHeaderRouter = require('./routes/purchases_header');
+const purchaseItemsRouter = require('./routes/purchases_items');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
@@ -26,6 +29,9 @@ app.use('/api/:uid',sameUserAuth);
 app.use('/api',productRouter);
 app.use('/api',clientRouter);
 app.use('/api',userRouter);
+app.use('/api',payRouter);
+app.use('/api', purchaseHeaderRouter);
+app.use('/api',purchaseItemsRouter);
 app.use('/api',testApiRouter);
 
 

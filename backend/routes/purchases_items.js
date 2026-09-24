@@ -63,11 +63,11 @@ router.put('/:uid/purchasesitems', async (req, res) => {
 
     }
 
-    const {product,head} = req.body;
+    const {product,head} = req.body.products;
 
     try {
 
-    const queryResponse = await db.query(`INSERT INTO cabecalho_compras (id_produto, id_cabecalho, uid) SELECT * FROM UNNEST($1::INTEGER[], $2::INTEGER[], $3::UUID[])`,[product,head,uid]);
+    const queryResponse = await db.query(`INSERT INTO produtos_compras (id_produto, id_cabecalho, uid) SELECT u.product, u.head FROM UNNEST($1::INTEGER[], $2::INTEGER[] as u(product,head))`,[product,head,uid]);
 
 
     res.status(204).send();
@@ -75,7 +75,7 @@ router.put('/:uid/purchasesitems', async (req, res) => {
     }
     catch(error){
 
-        res.status(500).send("Server Error!");
+        res.status(500).send(error.message);
 
     }
 });
@@ -90,9 +90,9 @@ router.patch('/:uid/purchasesitems/:pid', async (req, res) => {
 
     }
 
-    const {products} = req.body;
+    const {product} = req.body.products;
     try {
-    const queryResponse = await db.query(`UPDATE produtos_compras SET id_produto = u.products, id_cabecalho = u.head FROM UNNEST($1::INTEGER[], $2::INTEGER[], $3::UUID[], $4::INTEGER[]) AS u (products, head, uid, pid) WHERE produtos_compras.uid = u.uid AND produtos_compras.id = u.pid`,[products,head,uid,pid]);
+    const queryResponse = await db.query(`UPDATE produtos_compras SET id_produto = u.products, id_cabecalho = u.head FROM UNNEST($1::INTEGER[], $2::INTEGER[], $3::UUID[], $4::INTEGER[]) AS u (products, head, uid, pid) WHERE produtos_compras.uid = u.uid AND produtos_compras.id = u.pid`,[product,head,uid,pid]);
 
     res.status(204).send();
     }
@@ -113,10 +113,10 @@ router.delete('/:uid/purchasesitems/:pid', async (req,res) =>{
 
     }
 
-    const {products} = req.body
+    const {product} = req.body.products
 
     try {
-    const queryResponse = await db.query(`DELETE FROM produtos_compras WHERE uid = $1 AND id = ANY($2::INTEGER)`,[uid,products]);
+    const queryResponse = await db.query(`DELETE FROM produtos_compras WHERE uid = $1 AND id = ANY($2::INTEGER)`,[uid,product]);
 
     res.status(204).send();
     }
@@ -130,3 +130,4 @@ router.delete('/:uid/purchasesitems/:pid', async (req,res) =>{
 
 
 module.exports = router;
+
